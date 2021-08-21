@@ -25,7 +25,6 @@ export default class Wiki {
         this.db.data.pages[slug] = {
             dateCreated: Date.now(),
             title: title,
-            tags: tags,
             contentVersions: []
         };
         this.db.write();
@@ -49,7 +48,6 @@ export default class Wiki {
         return {
             dateCreated: dateCreated,
             title: title,
-            tags: tags,
             content: latestContentVersion
         }
     }
@@ -58,11 +56,6 @@ export default class Wiki {
 
     updatePageTitle(slug, newTitle) {
         this.page(slug).title = newTitle;
-        this.db.write();
-    }
-
-    updatePageTags(slug, newTags) {
-        this.page(slug).tags = newTags;
         this.db.write();
     }
 
