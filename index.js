@@ -21,7 +21,7 @@ export default class Wiki {
         return this.db.data.pages[slug];
     }
 
-    createPage (title, slug, tags = []) {
+    createPage (title, slug) {
         this.db.data.pages[slug] = {
             dateCreated: Date.now(),
             title: title,
@@ -43,7 +43,7 @@ export default class Wiki {
     }
 
     getPageWithLatestContentVersion (slug) {
-        let { dateCreated, title, tags, contentVersions } = this.page(slug);
+        let { dateCreated, title, contentVersions } = this.page(slug);
         let latestContentVersion = contentVersions.slice(-1);
         return {
             dateCreated: dateCreated,

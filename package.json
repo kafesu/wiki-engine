@@ -1,11 +1,14 @@
 {
   "name": "wiki",
   "version": "1.0.0",
-  "description": "Wiki engine that runs on LowDB",
+  "description": "A minimal Wiki Engine that runs on LowDB in Node",
   "type": "module",
   "main": "index.js",
   "scripts": {},
-  "keywords": [],
+  "keywords": ["wiki", "lowDB", "cms", "minimal", "headless"],
   "author": "Anesu Kafesu",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "lowdb": "^2.1.0"
+  }
 }
