@@ -1,55 +1,83 @@
 import { join, dirname } from 'path';
 import { Low, JSONFile } from 'lowdb';
 import { fileURLToPath } from 'url';
+import { v4 as uuidv4 } from 'uuid';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const file = join(__dirname, 'db.json')
-const adapter = new JSONFile(file);
-const db = new Low(adapter);
-await db.read();
+export class Wiki {
+    constructor (name) {
+        this.DATABASE_NAME = name + ".json";
+        this.db = {}
+    }
 
-export default class Wiki {
-    constructor () {
-        this.db = db;
+    async initialise () {
+        //Creating the file path
+        const __dirname = dirname(fileURLToPath(import.meta.url));
+        const file = join(__dirname, this.DATABASE_NAME);
+
+        //Creating the adapter and reading the file
+        const adapter = new JSONFile(file);
+        this.db = new Low(adapter);
+
+        //Reading the data
+        await this.db.read();
+        
+        this.db.data = this.db.data || { pages: {} }
     }
 
     // Returns a reference to a page using a slug
     page (slug) {
-        if ( !this.db.data.pages[slug]) {
-            throw `Page with slug ${slug} does not exist`;
+        if ( !this.db.data.pages[slug] ) {
+            throw `SLUG_NOT_FOUND`;
         }
         return this.db.data.pages[slug];
     }
 
     createPage (title, slug) {
-        this.db.data.pages[slug] = {
+        if ( this.db.data.pages[slug] ) {
+            throw "PAGE_ALREADY_EXISTS";
+        }
+
+        let newPage = {
             dateCreated: Date.now(),
             title: title,
             contentVersions: []
         };
+
+        this.db.data.pages[slug] = newPage;
         this.db.write();
     }
 
-    createContentVersionForPage (slug, content) {
-        let contentVersion = { dateCreated: Date.now(), content: content }
+    createContentVersion (slug, content, comment) {
+        let contentVersion = { 
+            id: uuidv4(),
+            dateCreated: Date.now(), 
+            comment: comment,
+            content: content
+        }
+
         this.page(slug).contentVersions.push(contentVersion);
         this.db.write();
     }
 
-    // READ
-
-    getPageWithAllContentVersions (slug) {
-        return this.page(slug);
+    getAllPages () {
+        return this.data.pages;
     }
 
-    getPageWithLatestContentVersion (slug) {
-        let { dateCreated, title, contentVersions } = this.page(slug);
-        let latestContentVersion = contentVersions.slice(-1);
-        return {
+    getPage (slug, version) {
+        let { dateCreated, title, contentVersions } = page(slug);
+        let content = version ? contentVersions.filter(x => x.id == version)[0]: contentVersions.slice(-1);
+         
+        let page = {
             dateCreated: dateCreated,
             title: title,
-            content: latestContentVersion
+            content: content
         }
+
+        return page;
+    }
+
+    getPageAll (slug) {
+        return this.page(slug);
     }
 
     // UPDATE
@@ -67,16 +95,25 @@ export default class Wiki {
 
     // DELETE
     deletePage (slug) {
-        delete this.db.data.pages[slug];
+        try {
+            delete this.db.data.pages[slug];
+            this.db.write();
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    deleteContentVersion (slug, versionId) {
+        this.pages(slug).contentVersion = this.pages(slug).contentVersion.filter(x => x != versionId);
         this.db.write();
     }
 
-    popContentVersionOfPage(slug) {
-        this.page(slug).contentVersions.pop();
+    deleteAllContentVersionsExcept(slug, versionId) {
+        this.pages(slug).contentVersion = this.pages(slug).contentVersion.filter(x => x == versionId);
         this.db.write();
     }
 
-    trimContentVersions(slug) {
+    trim(slug) {
         // deletes all content versions except latest one
         let length = this.page(slug).contentVersions.length;
         this.page(slug).contentVersions.splice(0, length - 1);

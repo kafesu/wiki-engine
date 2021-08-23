@@ -14,9 +14,13 @@ To use the wiki engine, begin by installing it using npm:
 
     import { Wiki } from 'wiki-engine';
 
-Create a wiki by creating an instance of a wiki class. The class constructor takes in one parameter, `name` which is the name of the wiki you want to create.
+Create a wiki by creating an instance of the `wiki` class. The class constructor takes in one parameter, `name` which is the name of the wiki you want to create.
 
-    const wiki = new Wiki('my_wiki';
+    const wiki = new Wiki('my_wiki');
+
+Then next step is to initialise the wiki. Initialisation is an asynchronous function. So to ensure none of your code runs until the wiki is initialised, use the await keyword.
+
+    await wiki.initialise();
 
 If the wiki already exists, the wiki's data is loaded and the wiki is accessible through that identifier.
 
@@ -27,7 +31,7 @@ It is also possible to have more than one wiki running in a single session as lo
 
 ### 2. Creating pages in your wiki
 
-Once you have an instance of the wiki running, you can create a page in the wiki by calling the `createPage()` method. It requires two string parameters: `title`, which is the title of the page, and `slug`, which is the slug of the page. The slug has to be unique for all pages. As it is what `wiki-engine` uses to identify a page.
+Once you have an instance of the wiki running, you can create a page in the wiki by calling the `createPage()` method. It requires two string parameters: `title`, which is the title of the page, and `slug`, which is the slug of the page. The slug has to be unique for all pages because it is what `wiki-engine` uses to identify a page.
 
     wiki.createPage("My first page", "my-first-page");`
 
@@ -90,7 +94,7 @@ Each page will be identified by a slug, and has data about the date it was creat
 
 ### 5. Getting the contents of a specific page
 
-To get an individual page you use the `getPage()` method. It takes in a mandatory `slug` parameter and an optional `id` parameter. The `slug` parameter is a string representing the slug of the page you want to access. The `version` parameter is a string that takes in the `id` of a specific version of the page's content you want to access. In the absence of a `version` argument, the function returns the latest version.
+To get an individual page you use the `getPage()` method. It takes in a mandatory `slug` parameter and an optional `versionId` parameter. The `slug` parameter is a string representing the slug of the page you want to access. The `versionId` parameter is a string that takes in the version id of a specific version of the page's content you want to access. In the absence of a `version` argument, the function returns the latest version.
 
     const allVersions = wiki.getPage("my-first-page");
     // This will return a page with latest content version
@@ -98,7 +102,7 @@ To get an individual page you use the `getPage()` method. It takes in a mandator
     const specificVersion = wiki.getPage("my-first-page", "4165075e-7667-4d16");
     // This will return a page with the specified content version
 
-To get a page with all of its contents use the `page()` method. That takes in `slug` parameter
+To get a page with all of its contents use the `getPage()` method. That takes in `slug` parameter
 
     wiki.page("my-first-page");
     // This will return "my-first-page", with all the content versions that acre currently stored.
